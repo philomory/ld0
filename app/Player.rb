@@ -1,7 +1,9 @@
 module LD0
   class Player < Chingu::GameObject
-    trait :bounding_box, :scale => 0.8
-    traits :collision_detection, :velocity
+    trait :bounding_box, :scale => 0.8, :debug => $DEBUG
+    traits :collision_detection
+    trait :velocity, :apply => false
+    include TerrainCollision
     def setup
       $player = self
       @image = Image["player.png"]
@@ -18,29 +20,37 @@ module LD0
     end
 
     def move_up
-      move(0,-2)
+      move(0,-2,:north)
     end
 
     def move_down
-      move(0,2)
+      move(0,2,:south)
     end
 
     def move_left
-      move(-2, 0)
+      move(-2, 0,:west)
     end
 
     def move_right
-      move(2,0)
+      move(2,0,:east)
     end
 
-    def move(x,y)
+    def move(x,y,dir)
       self.x += x
       self.y += y
-      self.each_collision(Wall,Dog,DogOnly,Door) do |me, wall|
-        self.x = previous_x
-        self.y = previous_y
-        break
+      if self.colliding_with_terrain?(dir)
+        self.revert_position
+      else
+        self.each_collision(Dog,DogOnly,Door) do |me, wall|
+          self.revert_position
+          break
+        end
       end
+    end
+
+    def revert_position
+      self.x = previous_x
+      self.y = previous_y
     end
 
     def tell_dog_come_here

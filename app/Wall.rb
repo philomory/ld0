@@ -1,6 +1,6 @@
 module LD0
   class Wall < Chingu::GameObject
-    trait :bounding_box
+    trait :bounding_box, :debug => $DEBUG
     trait :collision_detection
 
     def setup

@@ -2,6 +2,9 @@ module LD0
   class Dog < Chingu::GameObject
     trait :bounding_box, :scale => 0.50
     traits :collision_detection, :velocity
+    include TerrainCollision
+    
+    attr_accessor :fetch_stick
     def setup
       $dog = self
       @image = Image['dog.png']
@@ -17,32 +20,60 @@ module LD0
     end
     
     def come_to_player
+      unfetch
       @target_x = $player.x
       @target_y = $player.y
     end
     
     def stay
+      unfetch
       @target_x = self.x
       @target_y = self.y
     end
     
+    def fetch(stick)
+      @fetch_stick = stick
+    end
+    
+    def unfetch
+      @fetch_stick.decay if @fetch_stick
+      @fetch_stick = nil
+    end
+    
     def update
+      if @fetch_stick
+        @target_x, @target_y = @fetch_stick.x, @fetch_stick.y
+      end
+      
       move_x = (@target_x <=> @x) * 2
       move_y = (@target_y <=> @y) * 2
+      
       if move_x.nonzero?
         self.x += move_x
-        self.each_collision(Wall,Player,PlayerOnly,Door) do |me, wall|
+        dir = move_x > 0 ? :east : :west
+        if self.colliding_with_terrain?(dir)
           self.x = previous_x
-          break
+        else
+          self.each_collision(Player,PlayerOnly,Door) do |me, wall|
+            self.x = previous_x
+            break
+          end
         end
       end
+      
       if move_y.nonzero?
         self.y += move_y
-        self.each_collision(Wall,Player,PlayerOnly,Door) do |me, wall|
+        dir = move_y > 0 ? :south : :north
+        if self.colliding_with_terrain?(dir)
           self.y = previous_y
-          break
+        else
+          self.each_collision(Player,PlayerOnly,Door) do |me, wall|
+            self.y = previous_y
+            break
+          end
         end
       end
+      
       if self.x == previous_x && self.y == previous_y
         @target_x = self.x
         @target_y = self.y

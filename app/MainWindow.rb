@@ -8,5 +8,10 @@ module LD0
       push_game_state(LevelState.new(:level => 1))
     end
 
+    def update
+      super
+      self.caption = self.fps
+    end
+
   end
 end
