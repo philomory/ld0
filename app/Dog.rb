@@ -10,8 +10,10 @@ module LD0
       @image = Image['dog.png']
       self.input = {
         :c => :come_to_player,
-        :s => :stay
+        :s => :stay,
+        :p => :speak
       }
+      self.zorder = 200
       @target_x = self.x
       @target_y = self.y
       update
@@ -40,6 +42,14 @@ module LD0
       @fetch_stick = nil
     end
     
+    def speak
+      return if Woof.size.nonzero?
+      Woof.create(:x => self.x     , :y => self.y - 16, :dir => :north)
+      Woof.create(:x => self.x     , :y => self.y + 16, :dir => :south)
+      Woof.create(:x => self.x + 16, :y => self.y     , :dir => :east)
+      Woof.create(:x => self.x - 16, :y => self.y     , :dir => :west)
+    end
+    
     def update
       if @fetch_stick
         @target_x, @target_y = @fetch_stick.x, @fetch_stick.y
@@ -54,7 +64,7 @@ module LD0
         if self.colliding_with_terrain?(dir)
           self.x = previous_x
         else
-          self.each_collision(Player,PlayerOnly,Door) do |me, wall|
+          self.each_collision(Player,Monster,PlayerOnly,Door) do |me, wall|
             self.x = previous_x
             break
           end

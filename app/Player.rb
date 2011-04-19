@@ -1,6 +1,6 @@
 module LD0
   class Player < Chingu::GameObject
-    trait :bounding_box, :scale => 0.8, :debug => $DEBUG
+    trait :bounding_box, :scale => 0.7, :debug => $DEBUG
     traits :collision_detection
     trait :velocity, :apply => false
     include TerrainCollision
@@ -13,8 +13,11 @@ module LD0
         :holding_up => :move_up,
         :holding_down => :move_down,
         :c => :tell_dog_come_here,
-        :s => :tell_dog_stay
+        :s => :tell_dog_stay,
+        :f => :tell_dog_fetch,
+        :p => :tell_dog_speak
       }
+      self.zorder = 200
       update
       cache_bounding_box
     end
@@ -41,7 +44,7 @@ module LD0
       if self.colliding_with_terrain?(dir)
         self.revert_position
       else
-        self.each_collision(Dog,DogOnly,Door) do |me, wall|
+        self.each_collision(Dog,Monster,DogOnly,Door) do |me, wall|
           self.revert_position
           break
         end
@@ -59,6 +62,14 @@ module LD0
     
     def tell_dog_stay
       puts "Stay!"
+    end
+
+    def tell_dog_fetch
+      puts "Fetch!"
+    end
+    
+    def tell_dog_speak
+      puts "Speak!"
     end
 
   end

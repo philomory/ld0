@@ -5,7 +5,8 @@ module LD0
     def initialize
       super WindowWidth, WindowHeight
       self.input = {:escape => :exit}
-      push_game_state(LevelState.new(:level => 1))
+      #push_game_state(LevelState.new(:level => 1))
+      push_game_state(Victory)
     end
 
     def update
